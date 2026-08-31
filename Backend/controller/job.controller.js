@@ -2,14 +2,17 @@ import Job from "../model/jobs.model.js"
 
 export const createJob =async (req,res) =>{
     try{
-        const{tittle,description,requirements,location,salary,experience,skill} = req.body
+        const{tittle,description,companyName,requirements,location,salary,type,experience,skill} = req.body
      const job  = new Job({
         tittle,
+        companyName,
         description,
         salary,
+        experience,
+        skill,
         location,
-        requirements
-
+        requirements,
+         type
      }) 
      await job.save()
      res.status(200).json({success:true,message:"job created successfully",job})
@@ -23,6 +26,7 @@ export const createJob =async (req,res) =>{
  export const getAllJob =async(req,res)=>{
     try{
          const job = await Job.find()
+         console.log(job);
          res.status(200).json({success:true,job})
     } catch(error){
         res.status(404).json({success:false})
@@ -33,6 +37,7 @@ export const getJobById =async(req,res)=>{
     try{
         const getJob =await Job.findById(req.params.id)
         if(!getJob){
+            return
             res.status(404).json({
                message:"job not found",
                success:false,
@@ -49,6 +54,7 @@ export const getJobById =async(req,res)=>{
         res.status(404).json({message:"something went wrong",error:error.message})
     }
 }
+// get my
 
 // update job
 export const updateJob =async (req,res )=>{

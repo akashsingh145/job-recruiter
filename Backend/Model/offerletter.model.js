@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const offerLetterSchema = new mongoose.Schema({
  applicationId:{
     type : mongoose.Schema.Types.ObjectId,
-    ref:"application",
+    ref:"Application",
     required:true,
  },
  candidateId: {
@@ -36,7 +36,7 @@ salary: {
     },
     status:{
         type:String,
-        enum:["sent","accept","reject"],
+        enum:["sent","accepted","rejected"],
         default:"sent"
     }
 });

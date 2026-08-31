@@ -1,7 +1,7 @@
 // console.log("Auth Middleware ");
 
 import jwt from "jsonwebtoken";
-import User from "../Model/User.model.js"
+import User from "../model/User.model.js";
 const authMiddleware = async(req,res,next)=>{
     
     
@@ -29,6 +29,7 @@ const authMiddleware = async(req,res,next)=>{
             return res.status(400).json({message:"user not found"})
         }
         req.user =user;
+        console.log("User Role:", req.user.role);
         next();
          
    

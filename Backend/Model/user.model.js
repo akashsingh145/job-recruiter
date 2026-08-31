@@ -21,13 +21,21 @@ const userSchema = new mongoose.Schema({
  },
     role:{
         type:String,
-        enum:["jobseeker","recruiter","admin"],
+        enum:["jobseeker","interviewer","admin"],
         default:"jobseeker",
     },
     phone:{
         type:String,
         required:true,
         match:[/^[0-9]{10}$/,"number must bhi 10 digit"]
+    },
+    resetPasswordToken:{
+        type:String,
+        default:null
+    },
+    resetPasswordExpire:{
+        type:Date,
+        default:null
     }
 })
 const User = mongoose.models.user || mongoose.model("user", userSchema);

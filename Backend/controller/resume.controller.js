@@ -1,20 +1,23 @@
-import Resume from "../model/Resume. model.js"
+import Resume from "../Model/resume.model.js"
 
 export const uploadResume =async(req,res) =>{
-    console.log(req.user);
+    // console.log(req.user);
     try{ 
-        const{candidateName,skill,experience, education, resumeFile} =req.body
-
+        const{skills,experience, education,} =req.body
+const resumeFile = req.file ? req.file.filename : "";
    
-const exiting = await Resume.findOne({candidateName})
+const exiting = await Resume.findOne({
+     candidateId: req.user._id,
+})
  if(exiting){
    return res.status (200).json({message:"resume already exist"})
  }
 
 //  create resume
 const resume = new Resume({
-    candidateName,
-    skill,
+    candidateId: req.user._id,
+    candidateName: req.user.username,
+    skills,
     experience,
     education,
 
@@ -31,8 +34,8 @@ res.status (201).json({ success:true,message:"resume uploaded successfully", res
 // get all resume
 export const getAllResume= async(req,res) =>{
     try{
-        const resume = await Resume.find();
-        res.status(200).json ({success:true,resume })
+        const resumes = await Resume.find();
+        res.status(200).json ({success:true,resumes })
     } catch(error){
         res.status(500).json({success:false,message:error.message})
 
@@ -78,5 +81,49 @@ export const deleteResume = async (req,res) =>{
 
     }
 }
+
+// export const uploadResume = async (req, res) => {
+//   console.log(req.user);
+
+//   try {
+//     const { skills, experience, education } = req.body;
+
+//     const resumeFile = req.file ? req.file.filename : "";
+
+//     const existing = await Resume.findOne({
+//       candidateId: req.user._id,
+//     });
+
+//     if (existing) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Resume already exists",
+//       });
+//     }
+
+//     const resume = new Resume({
+//       candidateId: req.user._id,
+//       candidateName: req.user.username,
+//       skill: skills,
+//       experience,
+//       education,
+//       resumeFile,
+//     });
+
+//     await resume.save();
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Resume uploaded successfully",
+//       resume,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 

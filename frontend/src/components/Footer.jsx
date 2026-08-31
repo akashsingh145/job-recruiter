@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 
 function Footer() {
   return (
-    <footer className="bg-slate-900 text-gray-300 mt-16">
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="w-full bg-slate-900 text-gray-300 ">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
 
         {/* Logo & About */}
         <div>
@@ -26,8 +26,8 @@ function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/jobs" className="hover:text-blue-400">
-                Jobs
+              <Link to="/job" className="hover:text-blue-400">
+                Job
               </Link>
             </li>
             <li>
@@ -76,7 +76,7 @@ function Footer() {
 
       </div>
 
-      <div className="border-t border-slate-700 py-4 text-center text-sm text-gray-400">
+      <div className="border-t border-slate-700 py-3 sm:py-4 text-center text-xs sm:text-sm text-gray-400">
         © {new Date().getFullYear()} Job Recruiter. All Rights Reserved.
       </div>
     </footer>

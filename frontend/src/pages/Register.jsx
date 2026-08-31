@@ -21,6 +21,10 @@ function Register(){
     }
         const handleSubmit=async(e)=>{
             e.preventDefault();
+             if (formData.password !== formData.confirmPassword) {
+    alert("Password and Confirm Password do not match");
+    return;
+  }
             try{
                 const api = await API.post("/users/register",formData)
                 alert(api.data.message);
@@ -39,7 +43,7 @@ function Register(){
 <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl">
 <h1 className="text-3xl text-center font-bold text-slate-800">
     Create Account</h1>
-<p className="text-center text-slate-500 mt-2">
+<p className="text-center text-slate-600 font-medium text-sm sm:text-base mt-2">
     Join Job Recruiter and start your career journey </p>
 <form onSubmit={handleSubmit}
 className="mt-8">
@@ -97,7 +101,7 @@ className="mt-8">
            
             <option value ="jobseeker">Jobseeker</option>
             <option value="admin">Admin</option>
-            <option value="intervier">Interviewer</option>
+            <option value="interviewer">Interviewer</option>
         </select>
     </div>
     {/* password */} 

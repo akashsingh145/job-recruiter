@@ -12,7 +12,7 @@ const applicationSchema = new mongoose.Schema({
      },
      resumeId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"resume",
+        ref:"Resume",
         required:true,
      },
      status:{
