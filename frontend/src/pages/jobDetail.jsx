@@ -128,11 +128,11 @@ const handleApply = async () => {
                   </div>
 
                   {/* about company */}
-                  <div className="text-2xl rounded-xl shadow-md p-8 mt-4"> 
+                  {/* <div className="text-2xl rounded-xl shadow-md p-8 mt-4"> 
                     <h2 className="text-2xl font-bold mb-4"> About Company</h2>
                     <p className="text-gray-600 leading-8"> {job?.companyDescription}
                     </p>
-                  </div>
+                  </div> */}
                   <div className="mt-8 flex justify-center">
                     <button onClick={handleApply} 
                     className="bg-cyan-500 hover:bg-cyan-600 text-white px-10 py-4 rounded-lg text-lg font-semibold">

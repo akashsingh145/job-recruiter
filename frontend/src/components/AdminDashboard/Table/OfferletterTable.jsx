@@ -138,7 +138,7 @@ console.log("FINAL OFFER LETTERS:", offerLetters);
                   </td>
 
                   {/* Action */}
-                  <td className="p-3 border">
+                  {/* <td className="p-3 border">
 
                     <button
                       onClick={() =>
@@ -150,9 +150,9 @@ console.log("FINAL OFFER LETTERS:", offerLetters);
                       className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
                     >
                       View
-                    </button>
+                    </button> */}
 
-                  </td>
+                  {/* </td> */}
 
                 </tr>
 
