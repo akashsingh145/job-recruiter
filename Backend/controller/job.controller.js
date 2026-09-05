@@ -19,6 +19,7 @@ export const createJob =async (req,res) =>{
      
 
     }catch(error){
+           console.log("🔥 JOB CREATE ERROR:", error);
         res.status(500).json({message:"something went wrong",error:error.message})
     }
 }

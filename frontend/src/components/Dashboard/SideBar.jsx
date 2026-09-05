@@ -19,7 +19,7 @@ import {
             icon:<FaTachometerAlt/>
         },
         {
-            name:"MyProfile",
+            name:"My Profile",
             path:"/user/profile",
             icon:< FaUser/>
 
@@ -30,7 +30,7 @@ import {
            icon:<FaFileAlt />
         },
         {
-            name:"AppliedJob",
+            name:"Applied Job",
             path:"/user/applied",
             icon:<FaBriefcase />
         },
@@ -40,7 +40,7 @@ import {
             icon:<FaCalendarAlt />
         },
         {
-            name:"Offerletter",
+            name:"Offer Letter",
             path:"/user/offerletter",
             icon:< FaFileSignature/>
         },

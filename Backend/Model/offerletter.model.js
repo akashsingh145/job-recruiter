@@ -26,7 +26,7 @@ type:String,
 required:true
 },
 salary: {
-        type: Number,
+        type:String,
         required: true
     },
     

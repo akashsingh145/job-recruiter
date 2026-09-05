@@ -170,6 +170,7 @@ function CreateOfferletter() {
 
             <input
               type="text"
+              name="name"
               value={
                 application?.candidateId?.username || ""
               }

@@ -32,9 +32,14 @@ const jobSchema =new mongoose.Schema({
 
     requirements:{
         type:String,
-        require:true,
+        required:true,
 
+    },
+    experience:{
+        type:String,
+        required:true
     }
+
 })
 // const job = mongoose.model("job",jobSchema);
 // export default job;

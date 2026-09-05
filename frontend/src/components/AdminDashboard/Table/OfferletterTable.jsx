@@ -93,7 +93,7 @@ console.log("FINAL OFFER LETTERS:", offerLetters);
 
                   {/* Candidate */}
                   <td className="p-3 border">
-                    {offer.candidateId?.name || "N/A"}
+                    {offer.candidateId?.username || "N/A"}
                   </td>
 
                   {/* Email */}

@@ -7,8 +7,10 @@ function CreateJob() {
     companyName:"",
     description: "",
     type:"",
+    skill:"",
     salary: "",
     location: "",
+    experience:"",
     requirements: "",
   });
 
@@ -34,8 +36,10 @@ function CreateJob() {
         companyName:"",
         description: "",
         type:"",
+        skill:"",
         salary: "",
         location: "",
+        experience:"",
         requirements: "",
       });
     } catch (error) {
@@ -179,6 +183,37 @@ function CreateJob() {
               required
             />
           </div>
+          {/* Skill */}
+           <div className="mb-5">
+            <label className="block font-medium text-gray-700 mb-2">
+              Skill
+            </label>
+            <input
+              type="text"
+              name="skill"
+              value={formData.skill}
+              onChange={handleChange}
+              placeholder="Example: html ,css"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+
+            </div>
+                {/* Skill */}
+           <div className="mb-5">
+            <label className="block font-medium text-gray-700 mb-2">
+              Experience
+            </label>
+            <input
+              type="text"
+              name="experience"
+              value={formData.experience}
+              onChange={handleChange}
+              placeholder="Example: html ,css"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            </div>
 
           {/* Button */}
           <button
