@@ -54,7 +54,7 @@ function JobTable(){
                 <tbody>
                     {jobs.map((job)=>(
                         <tr
-                        key={job.id}
+                        key={job._id}
                         className="border-b hover:bg-gray-100 transition"
                         >
                          <td  className="p-3">{job.tittle}</td>

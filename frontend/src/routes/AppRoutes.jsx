@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import ForgotPassword from "../pages/Forget";
 import ResetPassword from "../pages/Reset";
 import Register from "../pages/Register";
+import OTPVerification from "../pages/Otpverification"
 import Job from "../pages/Job"
 import DashboardLayout from "../Layout/DashboardLayout"
 import UserDashboard from "../pages/User/UserDashboard";
@@ -46,6 +47,7 @@ function AppRoutes() {
   element={<ResetPassword />}
 />
         <Route path="/register" element={<Register/>} />
+        <Route path="/otp-verification"element={< OTPVerification/>}/>
         
         <Route path="/job"element={<Job/>}/>
         <Route path ="/job/:id"element={<JobDetail/>}/>

@@ -3,8 +3,10 @@ const userSchema = new mongoose.Schema({
     username:{
         type:String,
         required:true,
-        match:[/^[A-Za-z][A-Z a-z 0-9_]*$/,
-            "username must be start a letter"]
+        trim:true,
+        match:[/^[A-Za-z][A-Z a-z ]*$/,
+            "username must be start a letter"],
+        maxlength:20
     },
     email:{
         type:String,
@@ -26,6 +28,7 @@ const userSchema = new mongoose.Schema({
     },
     phone:{
         type:String,
+        
         required:true,
         match:[/^[0-9]{10}$/,"number must bhi 10 digit"]
     },

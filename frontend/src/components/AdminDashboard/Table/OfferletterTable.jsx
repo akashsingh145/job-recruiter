@@ -24,6 +24,34 @@ function OfferLetterTable() {
     getOfferLetters();
   }, []);
 console.log("FINAL OFFER LETTERS:", offerLetters);
+const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this offer letter?"
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      const res = await API.delete(`/offerletter/${id}`);
+
+      alert(res.data.message);
+
+      // Remove deleted offer letter from table
+      setOfferLetters((prev) =>
+        prev.filter((offer) => offer._id !== id)
+      );
+    } catch (error) {
+      console.log("DELETE OFFER LETTER ERROR:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Offer letter delete failed"
+      );
+    }
+  };
+
   if (loading) {
     return <p className="p-6">Loading...</p>;
   }
@@ -68,7 +96,7 @@ console.log("FINAL OFFER LETTERS:", offerLetters);
                 Status
               </th>
 
-              <th className="p-3 border">
+               <th className="p-3 border">
                 Action
               </th>
 
@@ -136,23 +164,20 @@ console.log("FINAL OFFER LETTERS:", offerLetters);
                     </span>
 
                   </td>
-
-                  {/* Action */}
-                  {/* <td className="p-3 border">
+                   {/* DELETE ACTION */}
+                  <td className="p-3 border">
 
                     <button
                       onClick={() =>
-                        window.open(
-                          offer.offerLetter,
-                          "_blank"
-                        )
+                        handleDelete(offer._id)
                       }
-                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
                     >
-                      View
-                    </button> */}
+                      Delete
+                    </button>
 
-                  {/* </td> */}
+                  </td>
+
 
                 </tr>
 

@@ -31,6 +31,34 @@ res.status (201).json({ success:true,message:"resume uploaded successfully", res
         res.status(400).json({success:false,message:error.message})
     }
 }
+
+// getmyresume
+export const getMyResume = async(req,res)=>{
+    try{
+        const resume = await Resume.findOne({
+            candidateId:req.user._id
+        })
+        if(!resume){
+            return res.status(400).json({
+                success:false,
+                message:"Resume not found"
+            })
+        }
+        res.status(200).json({
+            success:true,
+            resume
+        })
+
+    }catch(error){
+        console.log(error)
+        res.status(500).json({
+            success:false,
+            message:"Something went wrong ",
+            error:error.message
+        })
+
+    }
+}
 // get all resume
 export const getAllResume= async(req,res) =>{
     try{
@@ -60,70 +88,92 @@ export const getResumeById = async(req,res) =>{
     }
 }
 // delete resume 
+export const deleteResume = async (req, res) => {
+  try {
+    const resume = await Resume.findById(req.params.id);
 
-export const deleteResume = async (req,res) =>{
-    try{
-        const deleteResume = await Resume.findByIdAndDelete(req.params.id)
-        if(!deleteResume){
-            res.status(404).json({
-                success:false,
-                message:"Resume not found"
-            })
-        }
-         res.status(200).json({
-                success:true,
-                message:"Resume deleted successfully"
-            })
-        
-
-    } catch(error){
-        res.status(500).json({success:false,message:error.message})
-
+    if (!resume) {
+      return res.status(404).json({
+        success: false,
+        message: "Resume not found"
+      });
     }
-}
 
-// export const uploadResume = async (req, res) => {
-//   console.log(req.user);
+    // Jobseeker sirf apna resume delete kar sakta hai
+    if (
+      req.user.role === "jobseeker" &&
+      resume.candidateId.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You can delete only your own resume"
+      });
+    }
 
-//   try {
-//     const { skills, experience, education } = req.body;
+    await Resume.findByIdAndDelete(req.params.id);
 
-//     const resumeFile = req.file ? req.file.filename : "";
+    return res.status(200).json({
+      success: true,
+      message: "Resume deleted successfully"
+    });
 
-//     const existing = await Resume.findOne({
-//       candidateId: req.user._id,
-//     });
+  } catch (error) {
+    console.log("DELETE RESUME ERROR:", error);
 
-//     if (existing) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Resume already exists",
-//       });
-//     }
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
-//     const resume = new Resume({
-//       candidateId: req.user._id,
-//       candidateName: req.user.username,
-//       skill: skills,
-//       experience,
-//       education,
-//       resumeFile,
-//     });
+export const updateResume = async (req, res) => {
+  try {
+    const resume = await Resume.findById(req.params.id);
 
-//     await resume.save();
+    if (!resume) {
+      return res.status(404).json({
+        success: false,
+        message: "Resume not found"
+      });
+    }
 
-//     res.status(201).json({
-//       success: true,
-//       message: "Resume uploaded successfully",
-//       resume,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
+    // Jobseeker sirf apna resume update kar sakta hai
+    if (
+      req.user.role === "jobseeker" &&
+      resume.candidateId.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You can update only your own resume"
+      });
+    }
 
+    const { skills, experience, education } = req.body;
 
+    resume.skills = skills;
+    resume.experience = experience;
+    resume.education = education;
+
+    // Agar new PDF/file upload hui hai tabhi file change karo
+    if (req.file) {
+      resume.resumeFile = req.file.filename;
+    }
+
+    await resume.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Resume updated successfully",
+      resume
+    });
+
+  } catch (error) {
+    console.log("UPDATE RESUME ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

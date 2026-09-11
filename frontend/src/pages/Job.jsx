@@ -46,12 +46,12 @@ useEffect(()=>{
 
       <section className="bg-slate-100 min-h-screen py-10">
 
-        <div className="max-w-7xl mx-auto px-4">
-          <SearchBar
+        <div className="max-w-7xl mx-auto px-4"> 
+          {/* <SearchBar
           
   search={search}
   setSearch={setSearch}
-/> 
+/>  */}
 
           <h1 className="text-3xl sm:text-4xl font-bold text-center text-slate-800">
             Latest Jobs

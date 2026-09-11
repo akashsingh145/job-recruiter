@@ -1,159 +1,191 @@
+
 import { useState } from "react";
-import{Link,useNavigate} from "react-router-dom"
-import API from "../Api/axios";
-function Register(){
+import { Link, useNavigate } from "react-router-dom";
+import API from "../Api/axios"
 
-    const navigate = useNavigate();
-    const[formData,setformData]=useState({
-        username:"",
-        email:"",
-        phone:"",
-        password:"",
-        confirmPassword:"",
-        role:"user"
+function Register() {
+  const navigate = useNavigate();
 
-    })
-    const handleChange=(e)=>{
-        setformData({...formData,
-            [e.target.name]:e.target .value
+  const [formData, setformData] = useState({
+    username: "",
+    email: "",
+    phone: "",
+    role: ""
+  });
 
-        })
-    }
-        const handleSubmit=async(e)=>{
-            e.preventDefault();
-             if (formData.password !== formData.confirmPassword) {
-    alert("Password and Confirm Password do not match");
+  const handleChange = (e) => {
+    setformData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const emailRegex = /^[A-Za-z0-9._%+-]+@gmail\.com$/;
+
+  if (!formData.username) {
+    alert("Please enter username");
     return;
   }
-            try{
-                const api = await API.post("/users/register",formData)
-                alert(api.data.message);
-                navigate("/login")
-            }
 
-                catch (error) {
-    console.log(error.response?.data);
-    alert(error.response?.data?.error || error.response?.data?.message);
+  if (!formData.email) {
+    alert("Please enter email");
+    return;
+  }
 
-            }
-        }
-    
-    return(
-        <section className="min-h-screen bg-slate-100 flex justify-center items-center px-5 py-10">
-<div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl">
-<h1 className="text-3xl text-center font-bold text-slate-800">
-    Create Account</h1>
-<p className="text-center text-slate-600 font-medium text-sm sm:text-base mt-2">
-    Join Job Recruiter and start your career journey </p>
-<form onSubmit={handleSubmit}
-className="mt-8">
-    {/* username */}
-    <div className="mb-5">
-        <label className="block text-slate-600 font-medium mb-2 ">
-            Username:
-        </label>
-        <input
-        type="name"
-        name="username"
-        value={formData.username}
-        onChange={handleChange}
-        placeholder="Enter Your Username"
-        className="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        
-    </div>
-    {/* email */}
-    <div className="mb-5">
-        <label className="block text-slate-600 font-medium mb-2">
-             Email:</label>
-        <input
-        type="email"
-        name="email"
-        value={formData.email}
-        onChange={handleChange}
-        placeholder="Enter Your Email"
-        className="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-        />
-    </div>
-    {/* phone */}
-    <div className="mb-5">
-        <label className="block text-slate-600 font-medium mb-2">
-             Contact Number</label>
-        <input
-        type="text"
-        name="phone"
-        value={formData.phone}
-        onChange={handleChange}
-        placeholder="Enter Your Number"
-        className="w-full border border-slate-200 rounded-lg  px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-        />
-    </div>
+  if (!emailRegex.test(formData.email)) {
+    alert("Please enter a valid Gmail address");
+    return;
+  }
 
-    {/* role */}
-    <div className="mb-4">
-        <label className="block mb-2 font-medium text-slate-700"> Role</label>
-        
-        <select className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-             name="role"
-            value={formData.role}
-            onChange={handleChange}>
-            <option value =" ">Select Role</option>
-           
-            <option value ="jobseeker">Jobseeker</option>
-            <option value="admin">Admin</option>
-            <option value="interviewer">Interviewer</option>
-        </select>
-    </div>
-    {/* password */} 
-    <div className="mb-5">
-        <label className="block text-slate-600 font-medium mb-2 ">
-            Password</label>
-        <input
-        type="password"
-        name="password"
-        value={formData.password}
-        onChange={handleChange}
-        placeholder="Enter Your Password"
-        minLength={8}
-        className=" w-full border border-slate-200 rounded-lg  px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-        />
-    </div>
-    {/* confirm password */}
-    <div className="mb-5">
-        <label className="   block text-slate-600 font-medium mb-2 ">  
-            Confirm Password</label>
-    <input
-    type="Password" 
-    name="confirmPassword"
-    value={formData.confirmPassword}
-    onChange={handleChange}
-    placeholder="Enter Confirm Password"
-    className=" w-full border border-slate-200 rounded-lg  px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-    />
-    </div>
-    {/* register button */}
-<button
+  if (!formData.phone) {
+    alert("Please enter phone number");
+    return;
+  }
+
+  if (formData.phone.length !== 10) {
+    alert("Phone number must be 10 digits");
+    return;
+  }
+
+  if (!formData.role) {
+    alert("Please select role");
+    return;
+  }
+
+  try {
+    const api = await API.post("/users/send-register-otp", {
+      email: formData.email
+    });
+
+    alert(api.data.message);
+
+    navigate("/otp-verification", {
+      state: formData
+    });
+
+  } catch (error) {
+    console.log("SEND OTP ERROR:", error.response?.data);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to send OTP"
+    );
+  }
+};
+  return (
+    <section className="min-h-screen flex items-center justify-center bg-slate-100 px-4 py-8">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 sm:p-8">
+
+        <h1 className="text-3xl font-bold text-center text-slate-800 mb-2">
+          Create Account
+        </h1>
+
+        <p className="text-center text-slate-500 mb-6">
+          Register your account
+        </p>
+
+        <form onSubmit={handleSubmit}>
+
+          <div className="mb-4">
+            <label className="block text-slate-600 font-medium mb-2">
+              Username
+            </label>
+
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Enter your username"
+              className="w-full border border-slate-200 rounded-lg px-3 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-slate-600 font-medium mb-2">
+              Email
+            </label>
+
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your Gmail"
+              className="w-full border border-slate-200 rounded-lg px-3 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-slate-600 font-medium mb-2">
+              Phone
+            </label>
+
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+
+                if (value.length <= 10) {
+                  setformData({
+                    ...formData,
+                    phone: value
+                  });
+                }
+              }}
+              placeholder="Enter your phone number"
+              maxLength={10}
+              inputMode="numeric"
+              className="w-full border border-slate-200 rounded-lg px-3 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="mb-5">
+            <label className="block text-slate-600 font-medium mb-2">
+              Role
+            </label>
+
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full border border-slate-200 rounded-lg px-3 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Role</option>
+              <option value="jobseeker">Jobseeker</option>
+              <option value="admin">Admin</option>
+              <option value="interviewer">Interviewer</option>
+            </select>
+          </div>
+
+          <button
             type="submit"
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
           >
-            Register
+            Send OTP
           </button>
 
-          {/* Login Link */}
+        </form>
 
-          <p className="text-center mt-6 text-slate-600">
-            Already have an account?{" "}
-            <Link
-              to="/login"className="text-blue-600 font-semibold hover:underline"
-            >
-              Login
-            </Link>
-            </p>
-              
-</form>
-</div>
-        </section>
-    
-    );
+        <p className="text-center text-slate-500 mt-5">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-blue-600 font-medium hover:underline"
+          >
+            Login
+          </Link>
+        </p>
+
+      </div>
+    </section>
+  );
 }
+
 export default Register;
+

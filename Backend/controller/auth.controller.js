@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 import Resume from "../Model/resume.model.js"
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
+import EmailVerification from "../Model/emailVerivication.model.js"
 
 export const register = async (req,res) =>{
     try{ 
@@ -45,6 +46,176 @@ catch (error) {
     res.status(500).json({message:"something went wrong",error :error.message})
 }
 }
+// send Otp 
+
+export const sendRegisterOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required"
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this email already exists"
+      });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await EmailVerification.findOneAndUpdate(
+      { email },
+      {
+        email,
+        otp,
+        expiresAt
+      },
+      {
+        upsert: true,
+        new: true
+      }
+    );
+
+    const emailMessage = `
+      <h2>Job Recurator Email Verification</h2>
+
+      <p>Your OTP for registration is:</p>
+
+      <h1>${otp}</h1>
+
+      <p>This OTP will expire in 10 minutes.</p>
+
+      <p>Please do not share this OTP with anyone.</p>
+    `;
+
+    await sendEmail(
+      email,
+      "Job Recurator - Email Verification OTP",
+      emailMessage
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully to your email"
+    });
+
+  } catch (error) {
+    console.log("SEND REGISTER OTP ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send OTP",
+      error: error.message
+    });
+  }
+};
+// verify Otp
+export const verifyRegisterOTP = async (req, res) => {
+  try {
+    const {
+      username,
+      email,
+      phone,
+      role,
+      otp,
+      password,
+      confirmPassword
+    } = req.body;
+
+    if (
+      !username ||
+      !email ||
+      !phone ||
+      !role ||
+      !otp ||
+      !password ||
+      !confirmPassword
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Password and Confirm Password do not match"
+      });
+    }
+
+    const verification = await EmailVerification.findOne({ email });
+
+    if (!verification) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP not found or expired"
+      });
+    }
+
+    if (verification.expiresAt < new Date()) {
+      await EmailVerification.deleteOne({ email });
+
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired"
+      });
+    }
+
+    if (verification.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP"
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      username,
+      email,
+      phone,
+      role,
+      password: hashedPassword
+    });
+
+    await user.save();
+
+    await EmailVerification.deleteOne({ email });
+
+    return res.status(201).json({
+      success: true,
+      message: "Registration successful"
+    });
+
+  } catch (error) {
+    console.log("VERIFY REGISTER OTP ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message
+    });
+  }
+};
 
 
 // login page
@@ -57,7 +228,7 @@ export const login = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                success: false,
+
                 message: "User not found"
             });
         }
