@@ -1,5 +1,6 @@
 import Application from "../Model/application.model.js";
 import Resume from "../Model/resume.model.js";
+// apply job
 export const applyJob = async(req,res)=>{
     console.log (req.body)
     try{

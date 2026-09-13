@@ -1,4 +1,5 @@
 import {  Routes, Route } from "react-router-dom";
+
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import ForgotPassword from "../pages/Forget";
@@ -6,6 +7,7 @@ import ResetPassword from "../pages/Reset";
 import Register from "../pages/Register";
 import OTPVerification from "../pages/Otpverification"
 import Job from "../pages/Job"
+import ProtectedRoute from "../components/ProtectedRoutes";
 import DashboardLayout from "../Layout/DashboardLayout"
 import UserDashboard from "../pages/User/UserDashboard";
 import JobDetail from "../pages/JobDetail"
@@ -52,6 +54,7 @@ function AppRoutes() {
         <Route path="/job"element={<Job/>}/>
         <Route path ="/job/:id"element={<JobDetail/>}/>
         {/* user */}
+        <Route element={<ProtectedRoute allowedRoles={["jobseeker"]} />}/>
         <Route path="/user" element={<DashboardLayout/>}>
         <Route path="dashboard"element={<UserDashboard/>}/>
         <Route path="resume"element={<Resume/>}/>
@@ -61,6 +64,7 @@ function AppRoutes() {
         <Route path="offerletter"element={<Offerletter/>}/>
         </Route>
         {/* admin */}
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}/>
         <Route path="/admin"element={<AdminLayout/>}>
         <Route path="dashboard"element={<AdminDashboard/>}/>
         <Route path="managejob"element={<ManageJobs/>}/>
@@ -82,6 +86,7 @@ function AppRoutes() {
         <Route path="createofferletter/:applicationId"element={<Createofferletter/>}/>
       </Route>
       {/* Interviewer */}
+      <Route element={<ProtectedRoute allowedRoles={["interviewer"]} />}/>
       <Route path="/interviewer" element={<InterviewerLayout/>}>
       <Route path ="dashboard"element={< InterviewerDashboard/>}/>
       <Route path ="interviewermanagejob"element={<InterviewerManageJob/>}/>
@@ -103,16 +108,3 @@ function AppRoutes() {
 export default AppRoutes;
 
 
-// import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-// function AppRoutes() {
-//   return (
-//     <BrowserRouter>
-//       <Routes>
-//         <Route path="/" element={<h1>Home Test</h1>} />
-//       </Routes>
-//     </BrowserRouter>
-//   );
-// }
-
-// export default AppRoutes;
