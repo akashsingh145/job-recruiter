@@ -8,14 +8,14 @@ import EmailVerification from "../Model/emailVerivication.model.js"
 
 export const register = async (req,res) =>{
     try{ 
-       const {username,email,password,confirmPassword,role,phone}= req.body;
+       const {username,emailrole,phone}= req.body;
        
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Password and Confirm Password do not match"
-      });
-    }
+    // if (password !== confirmPassword) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Password and Confirm Password do not match"
+    //   });
+    // }
 
     // exiting user 
 //     console.log(req.body);

@@ -54,7 +54,7 @@ function AppRoutes() {
         <Route path="/job"element={<Job/>}/>
         <Route path ="/job/:id"element={<JobDetail/>}/>
         {/* user */}
-        <Route element={<ProtectedRoute allowedRoles={["jobseeker"]} />}/>
+        <Route element={<ProtectedRoute allowedRoles={["jobseeker"]} />}>
         <Route path="/user" element={<DashboardLayout/>}>
         <Route path="dashboard"element={<UserDashboard/>}/>
         <Route path="resume"element={<Resume/>}/>
@@ -63,8 +63,9 @@ function AppRoutes() {
         <Route path="interview"element={<Interviews/>}/>
         <Route path="offerletter"element={<Offerletter/>}/>
         </Route>
+        </Route>
         {/* admin */}
-        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}/>
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
         <Route path="/admin"element={<AdminLayout/>}>
         <Route path="dashboard"element={<AdminDashboard/>}/>
         <Route path="managejob"element={<ManageJobs/>}/>
@@ -85,8 +86,9 @@ function AppRoutes() {
         <Route path ="manageofferletter" element={<ManageOfferletter/>}/>
         <Route path="createofferletter/:applicationId"element={<Createofferletter/>}/>
       </Route>
+      </Route>
       {/* Interviewer */}
-      <Route element={<ProtectedRoute allowedRoles={["interviewer"]} />}/>
+      <Route element={<ProtectedRoute allowedRoles={["interviewer"]} />}>
       <Route path="/interviewer" element={<InterviewerLayout/>}>
       <Route path ="dashboard"element={< InterviewerDashboard/>}/>
       <Route path ="interviewermanagejob"element={<InterviewerManageJob/>}/>
@@ -98,6 +100,7 @@ function AppRoutes() {
       <Route path="interviewermanageofferletter"element={<InterviewerManageOfferletter/>}/>
       <Route path="interviewercreateofferletter/:applicationId"element={<Createofferletter/>}/>
 
+      </Route>
       </Route>
     
       </Routes>
