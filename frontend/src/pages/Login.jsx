@@ -1,5 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
+import {useDispatch} from "react-redux"
 import { useState } from "react";
+import{loginUser} from "../store/userSlice"
 import API from "../Api/axios";
 import {
   FaBriefcase,
@@ -11,6 +13,7 @@ import {
 
 function Login() {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const [formData, setformData] = useState({
     email: "",
@@ -34,6 +37,8 @@ function Login() {
 
       localStorage.setItem("token", api.data.token);
       localStorage.setItem("user", JSON.stringify(api.data.user));
+
+        dispatch(loginUser(api.data.user));
 
       console.log("Response", api.data);
       alert(api.data.message);

@@ -1,13 +1,16 @@
 import { FaBell,FaUserCircle,FaSearch } from "react-icons/fa";
-import {useState,useEffect} from "react"
+// import {useState,useEffect} from "react"
+import{useSelector} from "react-redux"
 function Navbar({setIsOpen}){
-    const[user,setUser]=useState(null)
-    useEffect(()=>{
-       const storeUser=localStorage.getItem("user") ;
-       if(storeUser){
-        setUser(JSON.parse(storeUser));
-       }
-    },[])
+const user =useSelector((state)=>state.user.user)    //redux se data lene ke liye
+
+    // const[user,setUser]=useState(null)
+    // useEffect(()=>{
+    //    const storeUser=localStorage.getItem("user") ;
+    //    if(storeUser){
+    //     setUser(JSON.parse(storeUser));
+    //    }
+    // },[])
     return(
         <header className="flex items-center justify-between bg-white shadow-md px-6 py-4">
             <div>

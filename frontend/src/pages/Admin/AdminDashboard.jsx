@@ -1,6 +1,6 @@
 import DashboardCard from "../../components/Dashboard/DashboardCard";
 import {useState,useEffect} from "react";
-import API from "../../API/axios"
+import API from "../../Api/axios"
 import {
   FaUsers,
   FaBriefcase,
