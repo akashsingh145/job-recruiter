@@ -1,4 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import {useDispatch} from "react-redux"
+import {logoutUser} from "../../store/userSlice"
 import{
     FaTachometerAlt,
     FaUser,
@@ -10,6 +12,7 @@ import{
     FaSignOutAlt
 } from "react-icons/fa";
 function Sidebar({isOpen,setIsOpen}){
+    const dispatch = useDispatch()
 const menuItem =[
     {
          name:"Dashboard",
@@ -65,6 +68,7 @@ const menuItem =[
 ];
 const navigate = useNavigate();
 const handleLogout = () => {
+ dispatch(logoutUser())
   localStorage.removeItem("token");
   localStorage.removeItem("user");
 

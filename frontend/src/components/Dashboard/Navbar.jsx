@@ -3,12 +3,9 @@ import { FaBell,FaUserCircle,FaSearch } from "react-icons/fa";
 import{useSelector} from "react-redux"
 
 function Navbar({setIsOpen}){
+    
   const user =  useSelector((state)=>state.user.user)
-    // const[user,setUser]=useState(null)
-    // useEffect(()=>{
-    //     const storedata = localStorage.getItem("user")
-    //     setUser(JSON.parse(storedata))
-    // },[])
+  
     return(
 
         

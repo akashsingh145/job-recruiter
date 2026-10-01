@@ -12,11 +12,15 @@ const initialState ={     //always intialvalue null hi rakte hai
             state.user = action.payload
 
         },
-        logout:(state)=>{
+        restoreUser:(state,action)=>{
+            state.user = action.payload
+
+        },
+        logoutUser:(state)=>{
             state.user = null
         }
     }
  })
 
- export  const  {loginUser,logout} = userSlice.actions
+ export  const  {loginUser,logoutUser,restoreUser} = userSlice.actions
  export default userSlice.reducer;
