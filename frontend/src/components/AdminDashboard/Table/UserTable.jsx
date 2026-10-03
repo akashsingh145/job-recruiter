@@ -1,43 +1,72 @@
-import {useState,useEffect} from "react";
 import API from "../../../Api/axios";
+import{
+    useQuery,
+    useMutation,
+    useQueryClient
+} from "@tanstack/react-query"
 function UserTable(){
-    const[users,setUsers]=useState([])
-    const[loading,setLoading]=useState(true)
-    const getalluser =async()=>{
-        try{
-            const api= await API.get("/users/all")
-             console.log("USER API RESPONSE:", api.data);
-            setUsers(api.data.users)
-        }catch(error){
-            console.log("error fetching user:",error)
-        } finally{
-            setLoading(false);
-        }
+    // get all user
+    const getAllUser = async()=>{
+        const api = await API.get("/users/all")
+        return api.data.users
     }
-    useEffect(()=>{
-        getalluser();
-    },[])
-    if(loading){
-        return
-        <h2 className="p-4 text-lg font-semibold">loading..</h2>
-        
-    }
+    
+    // useQuery 
+    const{data:users=[],isLoading,isError}=useQuery({
+        queryKey:["users"],
+        queryFn:getAllUser
+    })
 
-    const handledelete =async(id) => {
-        const confirmDelete = window.confirm("Are you sure you want delete user")
+    // queryClient
+    const queryClient = useQueryClient();
+
+    // delete user
+
+    const deleteUser = async(id)=>{
+        const api = await API.delete(`/users/${id}`)
+        return api.data.user
+    }
+    // useMutation
+    const deleteMutation =useMutation({
+        mutationFn:deleteUser,
+        onSuccess:()=>{
+            queryClient.invalidateQueries({
+                querykey:["users"]
+            })
+            alert("User delete successfully")
+        },
+        onError:(error)=>{
+             console.log("DELETE ERROR:", error);
+             console.log("RESPONSE:", error.response);
+              console.log("STATUS:", error.response?.status);
+              console.log("DATA:", error.response?.data);
+
+              console.log(error)
+              alert("delete failed")
+        }
+    })
+
+    const handleDelete = async(id)=>{
+        const confirmDelete = window.confirm(" Are you sure you want delete user")
         if(!confirmDelete){
-        return;
-        }
-        try{
-            await API. delete(`/users/${id}`)
-            setUsers((prevUsers)=>
-                 prevUsers.filter((user) => user._id !== id))
-            alert("user delete successfully")
+            return
 
-        }catch(error){
-            console.log(error)
-            alert("delete failed")
         }
+        deleteMutation.mutate(id)
+    }
+
+    // loading
+    if(isLoading){
+        return(
+            <h2 className="p-4 text-lg font-semibold">loading...</h2>
+        )
+    }
+
+    // error
+    if(isError){
+        return(
+            <h2 className ="p-4 text-lg font-semibold"> Error fetching User</h2>
+        )
     }
 
 
@@ -69,7 +98,7 @@ function UserTable(){
                                 <td className="p-3">{user.role}</td>
                                 <td className="p-3 text-center">
                                     <button 
-                                    onClick={()=>handledelete(user._id)}
+                                    onClick={()=>handleDelete(user._id)}
                                     className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
                                         Delete
                                     </button>
