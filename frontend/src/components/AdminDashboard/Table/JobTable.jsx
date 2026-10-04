@@ -1,42 +1,102 @@
-import {useState,useEffect} from "react"
-import API from "../../../Api/axios"
-import ManageJobs from "../../../pages/Admin/ManageJob";
-function JobTable(){
-    const[jobs,setJobs]=useState([])
-    const[loading,setLoading]=useState(true)
-    const getalljob= async()=>{
-        try{
-            const api= await API.get("/job")
-            setJobs(api.data.job)
-        }catch(error){
-            console.log("error fetching job:",error)
-        }finally{
-            setLoading(false);
-        }
-    };
-    useEffect(()=>{
-        getalljob();
-    },[])
-    if(loading){
-        return<h2 className="p-6 text-xl">Loadingjob...</h2>
-    }
-    const handledelete=async(id)=>{
-        const confirmDelete= window.confirm("Are you sure you want delete the job");
-        if(!confirmDelete)
-            return;
-        try{
-            await API.delete(`/job/${id}`)
-            setJobs((prevJobs)=>
-                 prevJobs.filter((job) => job._id !== id))
-            alert("job delete successfully")
+// import {useState,useEffect} from "react"
+// import API from "../../../Api/axios"
+// function JobTable(){
+//     const[jobs,setJobs]=useState([])
+//     const[loading,setLoading]=useState(true)
+//     const getalljob= async()=>{
+//         try{
+//             const api= await API.get("/job")
+//             setJobs(api.data.job)
+//         }catch(error){
+//             console.log("error fetching job:",error)
+//         }finally{
+//             setLoading(false);
+//         }
+//     };
+//     useEffect(()=>{
+//         getalljob();
+//     },[])
+//     if(loading){
+//         return<h2 className="p-6 text-xl">Loadingjob...</h2>
+//     }
+//     const handledelete=async(id)=>{
+//         const confirmDelete= window.confirm("Are you sure you want delete the job");
+//         if(!confirmDelete)
+//             return;
+//         try{
+//             await API.delete(`/job/${id}`)
+//             setJobs((prevJobs)=>
+//                  prevJobs.filter((job) => job._id !== id))
+//             alert("job delete successfully")
 
-        }catch(error){
-            console.log(error);
-            alert("delete failed")
-        }
+//         }catch(error){
+//             console.log(error);
+//             alert("delete failed")
+//         }
         
         
+//     }
+
+import API from "../../../Api/axios"
+import{useQuery,useQueryClient,useMutation} from "@tanstack/react-query"
+
+function JobTable(){
+    const getJob = async()=>{
+        const api = await API.get("/job")
+        console.log("JOB RESPONSE:",api.data)
+        return api.data.job
     }
+    // useQuery
+    const{data:job=[],isLoading,isError}=useQuery({
+        queryKey:["job"],
+        queryFn: getJob
+    })
+
+    // queryClient
+    const queryClient =useQueryClient()
+    
+    // delete
+    const deleteJob = async(id)=>{
+    const api = await API.delete(`/job/${id}`)
+    return api.data.job
+    }
+
+    // deteteMutaion
+     const  deleteMutation = useMutation({
+         mutationFn:deleteJob,
+         onSuccess:()=>{
+            queryClient.invalidateQueries({
+                querykey:["job"]
+            })
+            alert("job delete successfully")
+         },
+         onError:(error)=>{
+            console.log(error)
+            alert("job delete failed")
+         }
+     })
+         const handledelete = async(id)=>{
+            const confirmDelete = window.confirm("Are you sure you want delete the job")
+            if(!confirmDelete){
+                return
+            }
+            deleteMutation.mutate(id)
+         }
+
+        //  isloading
+        if(isLoading){
+            return(
+                <h2 className="p-4 text-lg font-semibold ">loading...</h2>
+            )
+        }
+
+        // isError
+        if(isError){
+            return(
+                <h2 className="p-4 text-lg font-semibold"> job fetching error</h2>
+            )
+        }
+
    
     return(
         <div className="bg-white rounded-xl shadow-lg p-6 mt-6 overflow-x-auto">
@@ -52,7 +112,7 @@ function JobTable(){
                     </tr>
                 </thead>
                 <tbody>
-                    {jobs.map((job)=>(
+                    {job.map((job)=>(
                         <tr
                         key={job._id}
                         className="border-b hover:bg-gray-100 transition"
