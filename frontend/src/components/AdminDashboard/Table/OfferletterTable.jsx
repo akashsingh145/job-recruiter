@@ -1,59 +1,63 @@
-import { useEffect, useState } from "react";
-import API from "../../../Api/axios";
 
-function OfferLetterTable() {
-  const [offerLetters, setOfferLetters] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const getOfferLetters = async () => {
-    try {
-      const res = await API.get("/offerletter/");
+import API from "../../../Api/axios"
+import{useQuery,useMutation,useQueryClient} from "@tanstack/react-query"
+function OfferLetterTable(){ 
+  const getOfferLetter = async()=>{ 
+    const api = await API.get("/offerletter/")
+    console.log("OFFERLETTER RESPONSE:",api.data)
+     return  api.data.offerletter
+    
+  }
+// useQuery
+const {data:offerletter=[],isLoading,isError}=useQuery({
+  queryKey:["offerletter"],
+  queryFn: getOfferLetter
+})
 
-    console.log("FRONTEND RESPONSE:", res.data);
-    console.log("FRONTEND OFFER LETTERS:", res.data.offerletter);
+// queryClient
 
-      setOfferLetters(res.data.offerletter|| []);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
+const queryClient = useQueryClient()
+
+// delete 
+const deleteOfferletter =async(id)=>{
+  const api = await API.delete(`/offerletter/${id}`)
+   return api.data.offerletter
+}
+
+// useMutation
+const deleteMutation = useMutation({
+    mutationFn:deleteOfferletter,
+    onSuccess:()=>{
+     queryClient.invalidateQueries({
+      queryKey:["offerletter"]
+     })
+     alert("offerletter delete successfully")
+    },
+    onError:(error)=>{
+      console.log (error)
+      alert("offerletter delete failed")
     }
-  };
-
-  useEffect(() => {
-    getOfferLetters();
-  }, []);
-console.log("FINAL OFFER LETTERS:", offerLetters);
-const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this offer letter?"
-    );
-
-    if (!confirmDelete) {
-      return;
+  })
+  const handleDelete= async(id)=>{
+    const confirmDelete = window.confirm("Are you sure you want delete the offer letter")
+    if(!confirmDelete){
+      return
     }
+    deleteMutation.mutate(id)
+  }
 
-    try {
-      const res = await API.delete(`/offerletter/${id}`);
-
-      alert(res.data.message);
-
-      // Remove deleted offer letter from table
-      setOfferLetters((prev) =>
-        prev.filter((offer) => offer._id !== id)
-      );
-    } catch (error) {
-      console.log("DELETE OFFER LETTER ERROR:", error);
-
-      alert(
-        error.response?.data?.message ||
-          "Offer letter delete failed"
-      );
-    }
-  };
-
-  if (loading) {
-    return <p className="p-6">Loading...</p>;
+  // isLoding
+  if(isLoading){
+    return(
+      <h2 className="p-4 text-lg font-semibold">loading...</h2>
+    )
+  }
+  // isError
+  if(isError){
+    return(
+      <h2 className="p-4 text-lg font-semibold"> fetching offerletter error</h2>
+    )
   }
 
   return (
@@ -105,7 +109,7 @@ const handleDelete = async (id) => {
 
           <tbody>
 
-            {offerLetters.length === 0 ? (
+            {offerletter.length === 0 ? (
               <tr>
                 <td
                   colSpan="7"
@@ -115,7 +119,7 @@ const handleDelete = async (id) => {
                 </td>
               </tr>
             ) : (
-              offerLetters.map((offer) => (
+              offerletter.map((offer) => (
 
                 <tr key={offer._id}>
 
