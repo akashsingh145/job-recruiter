@@ -1,62 +1,62 @@
-import { useEffect, useState } from "react";
-import API from "../../../Api/axios";
-import { useNavigate ,useLocation} from "react-router-dom";
 
-function ApplicationTable() {
-  const navigate = useNavigate()
+import {useState} from "react"
+
+import API from "../../../Api/axios"
+import {useQuery,useMutation,useQueryClient} from "@tanstack/react-query"
+import {useLocation,useNavigate} from "react-router-dom"
+
+function ApplicationTable(){
+  const[selectedApplication,setSelectedApplication]=useState(null)
+  const navigation = useNavigate()
   const location = useLocation()
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedApplication,setSelectedApplication]=useState(null)
+  
+const getApplication =async()=>{
+  const api = await API.get("/application")
+  console.log("APPLICATION RESPONSE:",api.data)
+  return api.data.application
+}
+// useQuery
+const{data:application=[],isLoading,isError}=useQuery({
+     querykey:["application"],
+     queryFn: getApplication
+})
+// queryClient 
+   const queryClient = useQueryClient()
 
-
- 
-  const getApplications = async () => {
-  try {
-    const res = await API.get("/application");
-
-    console.log("Applications:", res.data);
-
-    setApplications(res.data.application || []);
-
-  } catch (error) {
-    console.log(
-      "Get applications error:",
-      error.response?.data || error.message
-    );
-  } finally {
-    setLoading(false);
+  //  delete
+  const deleteApplication = async(id)=>{
+    const api = await API.delete(`/application/${id}`)
+    return api.data.application
   }
-};
-
-  useEffect(() => {
-    getApplications();
-  }, []);
-      if (loading) {
-    return (
-      <div className="bg-white rounded-xl shadow-md p-8 text-center">
-        <p className="text-gray-500">Loading applications...</p>
-      </div>
-    );
-  }
-      const handledelete=async(id)=>{
-        const confirmDelete= window.confirm("Are you sure you want delete the Application");
-        if(!confirmDelete)
-            return;
-        try{
-            await API.delete(`/application/${id}`)
-            setApplications((prevApplication)=>
-                 prevApplication.filter((application) => application._id !== id))
-            alert("Application delete successfully")
-
-        }catch(error){
-            console.log(error);
-            alert("delete failed")
+  // deleteMutation
+  const deleteMutation = useMutation({
+         mutationFn:deleteApplication,
+         onSuccess:()=>{
+          queryClient.invalidateQueries({
+             queryKey:["application"]
+          })
+         }
+        })
+        //  handleDelete
+       const handleDelete = async(id)=>{
+        const confirmDelete = window.confirm("Are you sure you want delete this application")
+        if(!confirmDelete){
+          return
         }
-        
-        
-    }
+        deleteMutation.mutate(id)
+       }
 
+      //  isLoading
+      if(isLoading){
+        return(
+          <h2 className ="p-4 text-lg font-semibold">loading...</h2>
+        )
+      }
+      // isError
+      if(isError){
+        <h2 className = "p-4">application error fetching...</h2>
+      }
+  
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
 
@@ -101,7 +101,7 @@ function ApplicationTable() {
 
           <tbody className="divide-y">
 
-            {applications.length === 0 ? (
+            {application.length === 0 ? (
 
               <tr>
                 <td
@@ -114,7 +114,7 @@ function ApplicationTable() {
 
             ) : (
 
-              applications.map((application) => (
+              application.map((application) => (
 
                 <tr
                   key={application._id}
@@ -207,7 +207,7 @@ function ApplicationTable() {
                  Create Interview
                     </button>
                     <button
-                    onClick={()=>handledelete(application._id)}
+                    onClick={()=>handleDelete(application._id)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ">
                         Delete
                     </button>
@@ -268,7 +268,7 @@ function ApplicationTable() {
 
             </div>
             <div>
-                 {applications.resumeId ?.resumeFile? (
+                 {application.resumeId ?.resumeFile? (
                       <button
                       onClick={() => {
         const resumeUrl = `http://localhost:5000/uploads/${application.resumeId.resumeFile}`;
