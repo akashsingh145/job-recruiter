@@ -1,56 +1,122 @@
-import { useNavigate ,useLocation} from "react-router-dom";
+// import { useNavigate ,useLocation} from "react-router-dom";
 
-import { useEffect, useState } from "react";
-import API from "../../../Api/axios";
-console.log("🔥 INTERVIEW TABLE COMPONENT LOADED");
-function InterviewTable() {
-    const navigate = useNavigate()
-  const location = useLocation()
-  const [interviews, setInterviews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const[selectedInterview,setSelectedInterview]=useState(null)
+// import { useEffect, useState } from "react";
+// import API from "../../../Api/axios";
+// console.log("🔥 INTERVIEW TABLE COMPONENT LOADED");
+// function InterviewTable() {
+//     const navigate = useNavigate()
+//   const location = useLocation()
+//   const [interviews, setInterviews] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const[selectedInterview,setSelectedInterview]=useState(null)
 
-  const getAllInterview = async () => {
-    try {
-        console.log("🔥 GET INTERVIEW START");
-      const res = await API.get("/interview");
+//   const getAllInterview = async () => {
+//     try {
+//         console.log("🔥 GET INTERVIEW START");
+//       const res = await API.get("/interview");
 
-      console.log("INTERVIEW DATA:", res.data);
+//       console.log("INTERVIEW DATA:", res.data);
 
-      setInterviews(res.data.interview || []);
-    } catch (error) {
-      console.log("INTERVIEW ERROR:", error.response?.data || error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+//       setInterviews(res.data.interview || []);
+//     } catch (error) {
+//       console.log("INTERVIEW ERROR:", error.response?.data || error.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-  useEffect(() => {
-      console.log("🔥 USE EFFECT RUNNING");
-    getAllInterview();
-  }, []);
+//   useEffect(() => {
+//       console.log("🔥 USE EFFECT RUNNING");
+//     getAllInterview();
+//   }, []);
 
-  if (loading) {
-    return <h2 className="p-6">Loading...</h2>;
-  }
-  const handleDelete =async(id)=>{
-    const confirmDelete =window.confirm("are you sure you want delete interview")
-    if(!confirmDelete)
-      return;
-    try{
-       await API.delete(`/interview/${id}`)
-            setInterviews((prevInterview)=>
-                 prevInterview.filter((interview) => interview._id !== id))
-            alert("Interview delete successfully")
+//   if (loading) {
+//     return <h2 className="p-6">Loading...</h2>;
+//   }
+//   const handleDelete =async(id)=>{
+//     const confirmDelete =window.confirm("are you sure you want delete interview")
+//     if(!confirmDelete)
+//       return;
+//     try{
+//        await API.delete(`/interview/${id}`)
+//             setInterviews((prevInterview)=>
+//                  prevInterview.filter((interview) => interview._id !== id))
+//             alert("Interview delete successfully")
 
-        }catch(error){
-            console.log(error);
-            alert("delete failed")
+//         }catch(error){
+//             console.log(error);
+//             alert("delete failed")
 
     
 
-    }
+//     }
   
+//   }
+
+import API from "../../../Api/axios"
+import{useQuery,useMutation,useQueryClient} from "@tanstack/react-query"
+import{useNavigate,useLocation} from "react-router-dom"
+
+function InterviewTable(){
+  const  navigate= useNavigate()
+  const location = useLocation()
+
+  const getInterview = async()=>{
+    const api = await API.get("/interview")
+    console.log("INTERVIEW RESPONSE:",api.data)
+    return api.data.interview
+  }
+  // usequery
+  const{data:interview =[],isLoading,isError}=useQuery({
+       queryKey:["interview"],
+       queryFn: getInterview
+  })
+  // queryClient
+  const queryClient =useQueryClient()
+
+  // delete
+  const deleteInterview = async(id)=>{
+    const api = await API.delete(`/interview/${id}`)
+    return api.data.interview
+  }
+  // deletemutation
+  const deleteMutation = useMutation({
+    mutationFn:deleteInterview,
+    onSuccess:()=>{
+      queryClient.invalidateQueries({
+        queryKey:["interview"]
+      })
+      alert("interview delete successfull")
+    },
+    onError:(error)=>{
+      console.log (error)
+      alert("interview delete Failed")
+    }
+  })
+
+  const handledelete = async(id)=>{
+    const confirmDelete = window.confirm("Are you sure you want delete this interview")
+    if(!confirmDelete){
+      return
+    }
+    deleteMutation.mutate(id)
+  }
+  // isError
+  if(isError){
+    return(
+      <h2 className = "p-4 text-lg font- font-semibold">
+        Interview fetching Error
+      </h2>
+    )
+  }
+
+  // isLoading
+  if(isLoading){
+    return(
+      <h2 className = "p-4 text-lg font-semibold">
+        loading...
+      </h2>
+    )
   }
 
   return (
@@ -60,7 +126,7 @@ function InterviewTable() {
         Interview Table
       </h1>
 
-      {interviews.length === 0 ? (
+      {interview.length === 0 ? (
         <p className="text-gray-500">
           No interviews found
         </p>
@@ -82,7 +148,7 @@ function InterviewTable() {
 
           <tbody>
 
-            {interviews.map((interview) => (
+            {interview.map((interview) => (
 
               <tr
                 key={interview._id}
@@ -162,7 +228,7 @@ function InterviewTable() {
                     </td>
                 <td className="p-3">
                 <button
-                onClick={()=>handleDelete(interview._id)}
+                onClick={()=>handledelete(interview._id)}
                 className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
                 
                   delete
