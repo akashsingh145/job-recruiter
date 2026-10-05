@@ -1,44 +1,67 @@
-import {useState,useEffect} from "react"
-import API from "../../../Api/axios";
-function ResumeTable(){
-const[resumes,setResumes]=useState([])
-const[loading,setloadings]=useState(true)
-const getAllResume = async()=>{
-    try{
-        const api =await API.get("/resume")
-        setResumes(api.data.resumes)
-    }catch(error){
-          console.log("error fetching resume:",error)
-    }finally{
-        setloadings(false)
+
+import API from "../../../Api/axios"
+import {useQuery,useMutation,useQueryClient} from "@tanstack/react-query"
+ function ResumeTable(){
+    const getResume = async()=>{
+        const api = await API.get("/resume/")
+        console.log ("RESUME API RESPONSE:", api.data)
+        return api.data.resumes
     }
+    // useQuery
+    const{data:resumes=[],isLoading,isError}=useQuery({
+        queryKey:["resume"],
+        queryFn:getResume
+    })
+          const queryClient = useQueryClient()
     
-}
-useEffect(()=>{
-    getAllResume()
-},[])
-if(loading){
-    return<h2>loading..</h2>
-}
+        const deleteResume = async(id)=>{
+            const api =await API.delete(`/resume/${id}`)
+            return api.data.resume
+        }
+        // deleteMutation
+        const deleteMutation = useMutation({
+            mutationFn:deleteResume,
+            onSuccess:()=>{
+                queryClient.invalidateQueries({
+                   queryKey:["resume"] 
+                })
+                alert("Resume delete Successfully ")
+            },
+            onError:(error)=>{
+                console.log(error)
+                alert("resume delete failed")
+            }
 
-const handleDelete =async(id)=>{
-    const confirmDelete = window.confirm("Are You Sure You Want Delete Resume")
-if(!confirmDelete){
-    return;
-}
-try{
-    await API.delete(`/resume/${id}`)
-    setResumes((prevResumes)=>
-                 prevResumes.filter((resume) => resume._id !== id))
-            alert("resume delete successfully")
+        })
 
-        }catch(error){
-         console.log(error)
-         alert("delete failed")
+        // handleDelete
+        const handledelete = async(id)=>{
+            const confirmDelete = window.confirm("Are you sure you want delete this resume")
+            if(!confirmDelete){
+                return
+            }
+            deleteMutation.mutate(id)
+        }
+        // isloading
+        if(isLoading){
+            return(
+                <h2 className ="p-4 text-lg font-semibold">
+                    loading...
+                </h2>
+            )
+        }
         
-}
+        // isError
+        if(isError){
+            return(
+                <h2 className = "p-4 text-lg font-semibold">
+                   resume fetching error..
+                </h2>
+            )
+        }
 
-}   
+
+
     return(
         <div className="bg-white rounded-xl shadow-lg p-6 mt-6 overflow-x-auto">
             <h1 className="bg-white rounded-xl shadow-lg p-6 mt-6 overflow-x-auto"> Resume Table</h1>
@@ -77,7 +100,7 @@ try{
                                 </td>
                                 <td>
                                     <button 
-                                    onClick={()=>handleDelete(resume._id)}
+                                    onClick={()=>handledelete(resume._id)}
                                     className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
                                         Delete
                                     </button>
