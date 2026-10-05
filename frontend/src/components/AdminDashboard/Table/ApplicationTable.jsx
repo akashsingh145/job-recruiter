@@ -7,7 +7,7 @@ import {useLocation,useNavigate} from "react-router-dom"
 
 function ApplicationTable(){
   const[selectedApplication,setSelectedApplication]=useState(null)
-  const navigation = useNavigate()
+  const navigate = useNavigate()
   const location = useLocation()
   
 const getApplication =async()=>{

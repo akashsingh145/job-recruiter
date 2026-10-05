@@ -75,7 +75,7 @@ function UserTable(){
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6  mt-4 sm:mt-6">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4"> User Table</h1>
             <div className="w-full overflow-x-auto">
-            <table className="w-full min-w-[600px] border-collapse">
+            <table className="w-full min-w-600px border-collapse">
                 <thead>
                     <tr>
                         <th className="p-3 text-left">Name</th>
