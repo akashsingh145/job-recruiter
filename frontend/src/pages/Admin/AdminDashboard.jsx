@@ -1,5 +1,6 @@
 import DashboardCard from "../../components/Dashboard/DashboardCard";
-import {useState,useEffect} from "react";
+// import {useState,useEffect} from "react";
+import{useQuery} from "@tanstack/react-query"
 import API from "../../Api/axios"
 import {
   FaUsers,
@@ -9,26 +10,47 @@ import {
   FaFileSignature,
 } from "react-icons/fa";
 
-function  AdminDashboard() {
-const [stats,setStats]=useState({
-  totalUsers:"0",
-  totalResume:"0",
-  totalApplication:"0",
-  totalOfferLetter:"0"
+// function  AdminDashboard() {
+// const [stats,setStats]=useState({
+//   totalUsers:"0",
+//   totalResume:"0",
+//   totalApplication:"0",
+//   totalOfferLetter:"0"
 
-});
-useEffect(()=>{
-const adminDashboard = async()=>{
-  try{
-    const api =await API.get("/admin-dashboard")
-    console.log("ADMIN DASHBOARD DATA:", api.data);
-    setStats(api.data)
-  }catch(error){
-console.log(error)
+// });
+// useEffect(()=>{
+// const adminDashboard = async()=>{
+//   try{
+//     const api =await API.get("/admin-dashboard")
+//     console.log("ADMIN DASHBOARD DATA:", api.data);
+//     setStats(api.data)
+//   }catch(error){
+// console.log(error)
+//   }
+// }
+// adminDashboard();
+// },[])
+function AdminDashboard(){
+  const adminDashboard = async()=>{
+    const api = await API.get("/admin-dashboard")
+    console.log("ADMIN DASHBOARD RESPONSE:",api.data)
+    return api.data
   }
-}
-adminDashboard();
-},[])
+  const{data:stats=[],isLoading,isError}=useQuery({
+    queryKey:["admin-dashboard"],
+    queryFn:adminDashboard
+  })
+  if(isLoading){
+    return(
+      <h2 className="p-4 text-lg font-semibold">loading...</h2>
+    )
+  }
+  if(isError){
+    return(
+      <h2 className="p-4 text-lg font-semibold">something went wrong</h2>
+    )
+  }
+
 
   return (
     <div>

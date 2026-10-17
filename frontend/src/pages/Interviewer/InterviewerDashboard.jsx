@@ -1,6 +1,7 @@
 import DashboardCard from "../../components/Dashboard/DashboardCard";
-import {useState,useEffect} from "react"
+// import {useState,useEffect} from "react"
 import API from "../../Api/axios";
+import{useQuery,useMutation,useQueryClient} from "@tanstack/react-query"
 import {
   FaFileAlt,
   FaFileSignature,
@@ -9,22 +10,49 @@ import {
 
 function InterviewerDashboard() {
 
-  const[stats,setStats]=useState({
-    resume:"0",
-    applicatiom:"0",
-    offerletter:"0"
+  // const[stats,setStats]=useState({
+  //   resume:"0",
+  //   applicatiom:"0",
+  //   offerletter:"0"
+  // })
+  // useEffect(()=>{
+  //  const interviewerDashboard = async()=>{
+  //   try{
+  //       const api = await API.get("/interviewer-dashboard")
+  //       setStats(api.data)
+  //   }catch(error){
+  //        console.log(error)
+  //   }
+  //  }
+  //  interviewerDashboard() 
+  // },[])
+
+  const getInterviewerDashboard =async()=>{
+    const api = await API.get("/interviewer-dashboard")
+    console.log("RESPONSE INTERVIEWER-DASHBOARD API:",api.data)
+    
+    return api.data
+    
+  }
+  const{data:stats=[],isLoading,isError}=useQuery({
+    queryKey:["interviewer-dashboard"],
+    queryFn:getInterviewerDashboard
   })
-  useEffect(()=>{
-   const interviewerDashboard = async()=>{
-    try{
-        const api = await API.get("/interviewer-dashboard")
-        setStats(api.data)
-    }catch(error){
-         console.log(error)
-    }
-   }
-   interviewerDashboard() 
-  },[])
+  
+  if(isLoading){
+    return(
+      <h2 className ="p-4 text-lg font-semibold">
+        loading...
+      </h2>
+    )
+  }
+  if(isError){
+    return(
+      <h2 className ="p-4 text-lg font-semibold">Something went wrong</h2>
+    )
+  }
+  
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">

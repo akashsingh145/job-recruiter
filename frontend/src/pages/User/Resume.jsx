@@ -1,5 +1,11 @@
+
 import { useState, useEffect } from "react";
 import API from "../../Api/axios";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 function Resume() {
   const [formData, setFormData] = useState({
@@ -10,45 +16,42 @@ function Resume() {
   });
 
   const [resumeFile, setResumeFile] = useState(null);
-  const [resume, setResume] = useState(null);
-
-  const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
+  const queryClient = useQueryClient();
 
-  // GET MY RESUME
-  
   const getMyResume = async () => {
-    try {
-      const api = await API.get("/resume/my");
-
-      setResume(api.data.resume);
-
-      setFormData({
-        username: api.data.resume.candidateName || "",
-        skills: api.data.resume.skills || "",
-        experience: api.data.resume.experience || "",
-        education: api.data.resume.education || "",
-      });
-    } catch (error) {
-      if (error.response?.status === 404) {
-        setResume(null);
-      } else {
-        console.log("Get Resume Error:", error);
-      }
-    } finally {
-      setLoading(false);
-    }
+    const api = await API.get("/resume/my");
+    return api.data.resume;
   };
 
+  const {
+    data: resume = null,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["my-resume"],
+    queryFn: getMyResume,
+  });
 
   useEffect(() => {
-    getMyResume();
-  }, []);
+    if (resume) {
+      setFormData({
+        username: resume.candidateName || "",
+        skills: resume.skills || "",
+        experience: resume.experience || "",
+        education: resume.education || "",
+      });
+    } else {
+      setFormData({
+        username: "",
+        skills: "",
+        experience: "",
+        education: "",
+      });
+    }
+  }, [resume]);
 
-  // HANDLE TEXT INPUT
-  
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -56,77 +59,102 @@ function Resume() {
     });
   };
 
-  
-  // HANDLE FILE
-  
   const handleFileChange = (e) => {
     setResumeFile(e.target.files[0]);
   };
 
-  
-  // UPLOAD / UPDATE RESUME
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const saveResume = async (data) => {
+    if (resume) {
+      const api = await API.put(`/resume/${resume._id}`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-    try {
-      setSubmitting(true);
+      return api.data;
+    }
 
-      const data = new FormData();
+    data.append("username", formData.username);
 
-      data.append("skills", formData.skills);
-      data.append("experience", formData.experience);
-      data.append("education", formData.education);
+    const api = await API.post("/resume/upload", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-      // New file selected hai tabhi bhejna
-      if (resumeFile) {
-        data.append("resumeFile", resumeFile);
-      }
+    return api.data;
+  };
 
-      let api;
+  const resumeMutation = useMutation({
+    mutationFn: saveResume,
 
-      // Agar resume already exist karta hai
-      if (resume) {
-        api = await API.put(`/resume/${resume._id}`, data, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      } else {
-        // New resume upload
-        data.append("username", formData.username);
-
-        api = await API.post("/resume/upload", data, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      }
-
-      alert(api.data.message);
+    onSuccess: (data) => {
+      alert(data.message);
 
       setResumeFile(null);
       setEditMode(false);
 
-      // Updated resume dobara fetch karo
-      await getMyResume();
+      queryClient.invalidateQueries({
+        queryKey: ["my-resume"],
+      });
+    },
 
-    } catch (error) {
+    onError: (error) => {
       console.log("Resume Submit Error:", error);
 
       alert(
         error.response?.data?.message ||
           "Resume operation failed"
       );
-    } finally {
-      setSubmitting(false);
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const data = new FormData();
+
+    data.append("skills", formData.skills);
+    data.append("experience", formData.experience);
+    data.append("education", formData.education);
+
+    if (resumeFile) {
+      data.append("resumeFile", resumeFile);
     }
+
+    resumeMutation.mutate(data);
   };
 
-  
-  // DELETE RESUME
+  const deleteResume = async (id) => {
+    const api = await API.delete(`/resume/${id}`);
+    return api.data;
+  };
 
-  const handleDelete = async () => {
+  const deleteMutation = useMutation({
+    mutationFn: deleteResume,
+
+    onSuccess: (data) => {
+      alert(data.message);
+
+      setResumeFile(null);
+      setEditMode(false);
+
+      queryClient.invalidateQueries({
+        queryKey: ["my-resume"],
+      });
+    },
+
+    onError: (error) => {
+      console.log("Delete Resume Error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Resume delete failed"
+      );
+    },
+  });
+
+  const handleDelete = () => {
     if (!resume) return;
 
     const confirmDelete = window.confirm(
@@ -137,37 +165,10 @@ function Resume() {
       return;
     }
 
-    try {
-      const api = await API.delete(`/resume/${resume._id}`);
-
-      alert(api.data.message);
-
-      setResume(null);
-
-      setFormData({
-        username: "",
-        skills: "",
-        experience: "",
-        education: "",
-      });
-
-      setResumeFile(null);
-      setEditMode(false);
-
-    } catch (error) {
-      console.log("Delete Resume Error:", error);
-
-      alert(
-        error.response?.data?.message ||
-          "Resume delete failed"
-      );
-    }
+    deleteMutation.mutate(resume._id);
   };
 
-  
-  // LOADING
-  
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center p-10">
         <p className="text-lg font-semibold text-blue-600">
@@ -177,13 +178,20 @@ function Resume() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="flex justify-center items-center p-10">
+        <p className="text-lg font-semibold text-red-600">
+          Resume fetching error..
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-center items-center p-4 sm:p-8">
       <div className="w-full max-w-3xl bg-white shadow-lg rounded-xl p-5 sm:p-8">
-
-        {/* HEADER  */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-
           <h1 className="text-3xl font-bold text-blue-600">
             My Resume
           </h1>
@@ -198,10 +206,8 @@ function Resume() {
           )}
         </div>
 
-        {/* NO RESUME  */}
         {!resume && !editMode && (
           <div className="text-center py-8">
-
             <p className="text-gray-600 mb-5">
               You have not uploaded a resume yet.
             </p>
@@ -212,49 +218,34 @@ function Resume() {
             >
               Upload Resume
             </button>
-
           </div>
         )}
 
-        {/* RESUME DETAILS  */}
         {resume && !editMode && (
           <div className="space-y-5">
-
             <div className="border rounded-lg p-4">
-              <p className="text-gray-500 text-sm">
-                Name
-              </p>
-
+              <p className="text-gray-500 text-sm">Name</p>
               <p className="font-semibold text-lg">
                 {resume.candidateName}
               </p>
             </div>
 
             <div className="border rounded-lg p-4">
-              <p className="text-gray-500 text-sm">
-                Skills
-              </p>
-
+              <p className="text-gray-500 text-sm">Skills</p>
               <p className="font-semibold">
                 {resume.skills}
               </p>
             </div>
 
             <div className="border rounded-lg p-4">
-              <p className="text-gray-500 text-sm">
-                Experience
-              </p>
-
+              <p className="text-gray-500 text-sm">Experience</p>
               <p className="font-semibold">
                 {resume.experience}
               </p>
             </div>
 
             <div className="border rounded-lg p-4">
-              <p className="text-gray-500 text-sm">
-                Education
-              </p>
-
+              <p className="text-gray-500 text-sm">Education</p>
               <p className="font-semibold">
                 {resume.education}
               </p>
@@ -270,8 +261,6 @@ function Resume() {
               </p>
 
               <div className="flex flex-wrap gap-3">
-
-                {/* VIEW PDF */}
                 <a
                   href={`http://localhost:5000/uploads/${resume.resumeFile}`}
                   target="_blank"
@@ -281,28 +270,25 @@ function Resume() {
                   View Resume
                 </a>
 
-                {/* DELETE */}
                 <button
                   onClick={handleDelete}
-                  className="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700"
+                  disabled={deleteMutation.isPending}
+                  className="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
                 >
-                  Delete Resume
+                  {deleteMutation.isPending
+                    ? "Deleting..."
+                    : "Delete Resume"}
                 </button>
-
               </div>
             </div>
-
           </div>
         )}
 
-         {/* UPLOAD / UPDATE FORM  */}
         {editMode && (
           <form
             onSubmit={handleSubmit}
             className="space-y-5"
           >
-
-            {/* NAME */}
             <div>
               <label className="block font-semibold mb-2">
                 Username
@@ -319,7 +305,6 @@ function Resume() {
               />
             </div>
 
-            {/* SKILLS */}
             <div>
               <label className="block font-semibold mb-2">
                 Skills
@@ -336,7 +321,6 @@ function Resume() {
               />
             </div>
 
-            {/* EXPERIENCE */}
             <div>
               <label className="block font-semibold mb-2">
                 Experience
@@ -353,7 +337,6 @@ function Resume() {
               />
             </div>
 
-            {/* EDUCATION */}
             <div>
               <label className="block font-semibold mb-2">
                 Education
@@ -370,7 +353,6 @@ function Resume() {
               />
             </div>
 
-            {/* FILE */}
             <div>
               <label className="block font-semibold mb-2">
                 {resume
@@ -394,15 +376,13 @@ function Resume() {
               )}
             </div>
 
-            {/* BUTTONS */}
             <div className="flex flex-wrap gap-3">
-
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={resumeMutation.isPending}
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                {submitting
+                {resumeMutation.isPending
                   ? "Please wait..."
                   : resume
                   ? "Update Resume"
@@ -428,15 +408,13 @@ function Resume() {
               >
                 Cancel
               </button>
-
             </div>
-
           </form>
         )}
-
       </div>
     </div>
   );
 }
 
 export default Resume;
+

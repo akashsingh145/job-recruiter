@@ -1,41 +1,89 @@
-import {useState,useEffect} from "react";
-import{useNavigate} from "react-router-dom"
+// import {useState,useEffect} from "react";
+// import{useNavigate} from "react-router-dom"
+
+// import API from "../../Api/axios"
+// function AppliedJob() {
+// const navigate=useNavigate()
+
+
+// const [applications,setApplications]=useState([]);
+// const[loading,setLoading]=useState(true);
+
+// const getApplications =async()=>{
+//     try{
+//         const res = await API.get("/application/my")
+//          console.log("Applied Jobs Response:", res.data);
+
+//         setApplications(res.data.applications)
+//     }catch(error){
+//         // console.log (error)
+//         console.log("ERROR RESPONSE:", error.response?.data);
+
+//         alert(error.response?.data?.message||" Failed to fetch applications")
+//     }
+// finally{
+//     setLoading(false)
+// }
+
+// }
+// useEffect(()=>{
+//     getApplications()
+// },[])
+// if(loading){ 
+//     return(
+//     <div className="p-6">
+//         <h1>Loading..</h1>
+//     </div>
+//     )
+// }
 
 import API from "../../Api/axios"
-function AppliedJob() {
-const navigate=useNavigate()
-
-
-const [applications,setApplications]=useState([]);
-const[loading,setLoading]=useState(true);
-
-const getApplications =async()=>{
-    try{
-        const res = await API.get("/application/my")
-         console.log("Applied Jobs Response:", res.data);
-
-        setApplications(res.data.applications)
-    }catch(error){
-        // console.log (error)
-        console.log("ERROR RESPONSE:", error.response?.data);
-
-        alert(error.response?.data?.message||" Failed to fetch applications")
+import {useQuery,useMutation,useQueryClient} from "@tanstack/react-query"
+import {useNavigate} from "react-router-dom"
+function AppliedJob(){
+  const navigate =useNavigate()
+  const applyJob =async()=>{
+    const api = await API.get("/application/my")
+    console.log("APPLICATION API RESPONSE:",api.data)
+    return api.data.applications
+  }
+  // useQuery
+  const{data:applications=[],isLoading,isError}=useQuery({
+    queryKey:["application"],
+    queryFn:applyJob
+  })
+  // queryClient
+  const queryClient = useQueryClient()
+  // useMutation
+  const applicationMutation = useMutation({
+    mutationFn:applyJob,
+    onSuccess:()=>{
+      queryClient.invalidateQueries({
+        queryKey:["application"]
+      })
+    },
+    onError:(error)=>{
+      console.log("error")
+      
     }
-finally{
-    setLoading(false)
-}
+  })
 
-}
-useEffect(()=>{
-    getApplications()
-},[])
-if(loading){ 
+  // isLoading
+  if(isLoading){
     return(
-    <div className="p-6">
-        <h1>Loading..</h1>
-    </div>
+      <h2 className ="p-4 text-lg font-semibold">
+        loading...
+      </h2>
     )
-}
+  }
+  // isError
+  if(isError){
+    return(
+      <h2 className = "p-4 text-lg font-semibold">
+        applied job fetching error
+      </h2>
+    )
+  }
 
   return (
     <div className=" bg-gray-100 p-8">

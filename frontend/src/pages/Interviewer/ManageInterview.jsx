@@ -1,9 +1,9 @@
 import InterviewTable from "../../components/AdminDashboard/Table/InterviewTable";
 function InterviewerManageInterview(){
     return(
-        <diV>
+        <div>
             <InterviewTable/>
-        </diV>
+        </div>
     )
 }
 export default InterviewerManageInterview;

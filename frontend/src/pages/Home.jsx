@@ -41,13 +41,18 @@ function Home() {
                 </span>
                 With Us
               </h1>
+              
 
               {/* Description */}
               <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg lg:mx-0">
                 Discover exciting career opportunities from top companies.
                 Build your career with confidence and take the next step
                 toward your future.
-              </p>
+              </p> 
+              
+            
+            
+          
 
               {/* Buttons */}
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">

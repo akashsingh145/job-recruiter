@@ -1,38 +1,37 @@
-import { useEffect, useState } from "react";
-import API from "../../Api/axios";
+import API  from "../../Api/axios"
+  import{useQuery} from "@tanstack/react-query"
+  
+  function Interviews(){
+    const getInterview =async()=>{
+      const api = await API.get("/interview/my")
+      console.log("INTERVIEW API RESPONSE:",api.data)
+      return api.data.interviews
+      }
+      
+      // reactQuery
+      const{data:interviews=[],isLoading,isError}=useQuery({
+        queryKey:["interview"],
+        queryFn:getInterview
+      })
+     
+     
 
-function Interviews() {
-  const [interviews, setInterviews] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const getMyInterviews = async () => {
-    try {
-      const res = await API.get("/interview/my");
-
-      console.log("My Interviews:", res.data);
-
-      setInterviews(res.data.interviews || []);
-    } catch (error) {
-      console.log(
-        "Interview fetch error:",
-        error.response?.data || error.message
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getMyInterviews();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="p-6">
-        <h2>Loading interviews...</h2>
-      </div>
-    );
-  }
+      // isloading
+      if(isLoading){
+        return(
+          <h2 className ="p-4 text-lg font-semibold">
+            loading...
+          </h2>
+        )
+      }
+      // isError
+      if(isError){
+        return(
+          <h2 className = "p-4 text-lg font-semibold">
+            interview fetching error
+          </h2>
+        )
+      }
 
   return (
     <div className=" bg-gray-100 p-6">

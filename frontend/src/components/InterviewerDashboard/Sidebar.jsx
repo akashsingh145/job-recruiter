@@ -64,7 +64,8 @@ const menuItem =[
 ];
 const navigate = useNavigate();
 const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logoutUser())
+
   localStorage.removeItem("token");
   localStorage.removeItem("user");
 

@@ -1,32 +1,72 @@
 
 import Navbar from "../components/Navbar";
 import JobCard from "../components/JobCard";
-import { useState, useEffect } from "react";
+import { useState,   } from "react";
 import { FaSearch, FaBriefcase, FaFilter } from "react-icons/fa";
 import API from "../Api/axios";
+import{useQuery,useMutation,useQueryClient} from "@tanstack/react-query"
 
 function Jobs() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [jobs, setJobs] = useState([]);
+  // const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  const getAllJob = async () => {
-    try {
-      const res = await API.get("/job");
-      setJobs(res.data.job || []);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const getAllJob = async () => {
+  //   try {
+  //     const res = await API.get("/job");
+  //     setJobs(res.data.job || []);
+  //   } catch (error) {
+  //     console.log(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    getAllJob();
-  }, []);
+  // useEffect(() => {
+  //   getAllJob();
+  // }, []);
+
+const getAllJob = async()=>{
+  const api = await API.get("/job")
+  console.log("JOB RESPONSE API:",api.data)
+  return api.data.job
+}
+const{data:job=[],isLoading,isError}=useQuery({
+  queryKey:["job"],
+  queryFn:getAllJob
+})
+ const queryClient =useQueryClient()
+
+ const jobMutation =useMutation({
+  mutationFn:getAllJob,
+  onSuccess:()=>{
+    queryClient.invalidateQueries({
+      querykey:["job"]
+    })
+  },
+  onError:(error)=>{
+     console .log("error")
+  }
+ })
+//  isLoading
+if(isLoading){
+  return(
+    <h2 className = "p-4 text-lg font-semibold">
+      loading...
+    </h2>
+  )
+}
+// isError
+if(isError){
+  return(
+    <h2 className="p-4 text-lg font-semibold">
+      job fetching error
+    </h2>
+  )
+}
 
   // Search jobs
-  const filteredJobs = jobs.filter((job) => {
+  const filteredJobs = job.filter((job) => {
     const title = job.tittle || "";
 
     return title.toLowerCase().includes(search.toLowerCase());
@@ -104,7 +144,7 @@ function Jobs() {
               </h2>
 
               <p className="mt-2 text-sm text-slate-500">
-                {loading
+                {isLoading
                   ? "Finding available jobs..."
                   : `${filteredJobs.length} ${
                       filteredJobs.length === 1 ? "job" : "jobs"
@@ -120,7 +160,7 @@ function Jobs() {
           </div>
 
           {/* ================= LOADING ================= */}
-          {loading && (
+          {isLoading && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
               {[1, 2, 3, 4, 5, 6].map((item) => (
@@ -145,7 +185,7 @@ function Jobs() {
           )}
 
           {/* ================= JOB CARDS ================= */}
-          {!loading && filteredJobs.length > 0 && (
+          {!isLoading && filteredJobs.length > 0 && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
               {filteredJobs.map((job) => (
@@ -159,7 +199,7 @@ function Jobs() {
           )}
 
           {/* ================= NO JOB FOUND ================= */}
-          {!loading && filteredJobs.length === 0 && (
+          {!isLoading && filteredJobs.length === 0 && (
             <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-20 text-center">
 
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-2xl text-blue-600">

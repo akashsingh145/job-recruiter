@@ -1,87 +1,165 @@
 
-import { useState, useEffect } from "react";
-import API from "../../Api/axios";
+// import { useState, useEffect } from "react";
+// import API from "../../Api/axios";
 
-function Offerletter() {
-  const [offerletter, setOfferletter] = useState([]);
-  const [loading, setLoading] = useState(true);
+// function Offerletter() {
+//   const [offerletter, setOfferletter] = useState([]);
+//   const [loading, setLoading] = useState(true);
 
-  const getMyofferletter = async () => {
-    try {
-      setLoading(true);
+//   const getMyofferletter = async () => {
+//     try {
+//       setLoading(true);
 
-      const res = await API.get("/offerLetter/my");
+//       const res = await API.get("/offerLetter/my");
 
-console.log("FULL RESPONSE:", res.data);
-console.log("OFFER LETTER:", res.data.offerletter);
+// console.log("FULL RESPONSE:", res.data);
+// console.log("OFFER LETTER:", res.data.offerletter);
 
-      console.log("Offer Letter Response:", res.data);
-      console.log("Offer Letters:", res.data.offerletter);
+//       console.log("Offer Letter Response:", res.data);
+//       console.log("Offer Letters:", res.data.offerletter);
 
-      setOfferletter(res.data.offerletter || []);
+//       setOfferletter(res.data.offerletter || []);
 
-    } catch (error) {
-      console.log(
-        "Offer Letter Error:",
-        error.response?.data || error.message
-      );
+//     } catch (error) {
+//       console.log(
+//         "Offer Letter Error:",
+//         error.response?.data || error.message
+//       );
 
-      setOfferletter([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+//       setOfferletter([]);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-  useEffect(() => {
-    getMyofferletter();
-  }, []);
+//   useEffect(() => {
+//     getMyofferletter();
+//   }, []);
 
-  // ACCEPT
-  const handleAccept = async (id) => {
-    try {
-      const res = await API.put(`/offerLetter/accepted/${id}`);
+//   // ACCEPT
+//   const handleAccept = async (id) => {
+//     try {
+//       const res = await API.put(`/offerLetter/accepted/${id}`);
 
-      console.log("Accept Response:", res.data);
+//       console.log("Accept Response:", res.data);
 
-      alert("Offer letter accepted");
+//       alert("Offer letter accepted");
 
-      getMyofferletter();
-    } catch (error) {
-      console.log(
-        "Accept Error:",
-        error.response?.data || error.message
-      );
-    }
-  };
+//       getMyofferletter();
+//     } catch (error) {
+//       console.log(
+//         "Accept Error:",
+//         error.response?.data || error.message
+//       );
+//     }
+//   };
 
-  // REJECT
-  const handleReject = async (id) => {
-    try {
-      const res = await API.put(`/offerLetter/reject/${id}`);
+//   // REJECT
+//   const handleReject = async (id) => {
+//     try {
+//       const res = await API.put(`/offerLetter/reject/${id}`);
 
-      console.log("Reject Response:", res.data);
+//       console.log("Reject Response:", res.data);
 
-      alert("Offer letter rejected");
+//       alert("Offer letter rejected");
 
-      getMyofferletter();
-    } catch (error) {
-      console.log(
-        "Reject Error:",
-        error.response?.data || error.message
-      );
-    }
-  };
+//       getMyofferletter();
+//     } catch (error) {
+//       console.log(
+//         "Reject Error:",
+//         error.response?.data || error.message
+//       );
+//     }
+//   };
 
-  if (loading) {
-    return (
-      <div className="p-6 text-center">
-        <h2 className="text-xl font-semibold">
-          Loading offer letters...
-        </h2>
-      </div>
-    );
+//   if (loading) {
+//     return (
+//       <div className="p-6 text-center">
+//         <h2 className="text-xl font-semibold">
+//           Loading offer letters...
+//         </h2>
+//       </div>
+//     );
+//   }
+import API from "../../Api/axios"
+import {useQuery,useMutation,useQueryClient} from "@tanstack/react-query"
+function Offerletter(){
+  const getOfferletter = async()=>{
+    const api = await API.get("offerLetter/my")
+    console.log("RESPONSE OFFERLETTER API:",api.data)
+    return api.data.offerletter
+  }
+  // useQuery
+  const{data:offerletter=[],isLoading,isError}=useQuery({
+    queryKey:["offerletter"],
+    queryFn:getOfferletter
+  })
+  // useQueryClient
+   const queryClient = useQueryClient()
+  //   accept offerletter
+  const acceptOfferletter = async(id)=>{
+    const api = await API.put(`/offerLetter/accepted/${id}`)
+    console.log("RESPONSE RESPONSE ACCEPT:",api.data)
+     getOfferletter()
+     return api.data.offerLetter
   }
 
+  const acceptMutation = useMutation({
+    mutationFn:acceptOfferletter,
+    onSuccess:()=>{
+      queryClient.invalidateQueries({
+        querykey:["offerletter"]
+      })
+  
+    },
+    onError:(error)=>{
+      console.log(error)
+      alert("accept button are not working")
+    }
+  })
+  const handleAccept = async(id)=>{
+    const confirmAccept = window.confirm("Are you sure you want accept the offerletter")
+    if(!confirmAccept){
+      return
+    }
+    acceptMutation.mutate(id)
+  }
+  // reject
+  const rejectOfferletter = async(id)=>{
+    const api = await API.put(`offerLetter/reject/${id}`)
+    console.log("RESPONSE RESPONSE REJECT:",api.data)
+     getOfferletter()
+     return api.data.offerLetter
+  }
+
+  const rejectMutation = useMutation({
+    mutationFn:rejectOfferletter,
+    onSuccess:()=>{
+      queryClient.invalidateQueries({
+        querykey:["offerletter"]
+      })
+    },
+    onError:(error)=>{
+      console.log(error)
+    }
+  })
+  const handleReject= async(id)=>{
+    const confirmAccept = window.confirm("Are you sure you want reject the offerletter")
+    if(!confirmAccept){
+      return
+    }
+    rejectMutation.mutate(id)
+  }
+  if(isLoading){
+    return(
+      <h2 className ="p-4 text-lg font-semibold">loading...</h2>
+    )
+  }
+ if(isError){
+  return(
+    <h2 className="p-4 text-lg font-semibold"> offerletter fetching error</h2>
+  )
+ }
   return (
     <div className=" bg-gray-100 p-8">
 
